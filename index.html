@@ -24,27 +24,38 @@
         .tab-content.active {
             display: block;
         }
-        /* Estilos de impressão para o planejador */
+        
+        /* CORREÇÃO 1: Estilos de impressão aprimorados para o planejador */
         @media print {
-            .no-print, .no-print * { display: none !important; }
-            body { background: white !important; }
+            body * {
+                visibility: hidden;
+            }
+            #plano-impressao, #plano-impressao * {
+                visibility: visible;
+            }
             #plano-impressao {
-                color: black;
-                background: white;
-                box-shadow: none;
-                border: none;
+                position: absolute;
+                left: 0;
+                top: 0;
                 width: 100%;
                 margin: 0;
-                padding: 0;
+                padding: 2cm;
+                color: black;
+                background: white;
+                font-size: 12pt;
+                border: none;
+                box-shadow: none;
             }
-            #plano-impressao h1, #plano-impressao h2 { color: black; }
+            #plano-impressao h1, #plano-impressao h2 {
+                color: black;
+            }
         }
     </style>
 </head>
 <body class="text-gray-300">
 
     <!-- CABEÇALHO E NAVEGAÇÃO -->
-    <header class="bg-slate-800/50 backdrop-blur-sm shadow-md sticky top-0 z-40 border-b border-slate-700">
+    <header class="bg-slate-800/50 backdrop-blur-sm shadow-md sticky top-0 z-40 border-b border-slate-700 no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center space-x-4">
@@ -78,11 +89,11 @@
 
         <!-- ### CONTEÚDO DO PLANEJADOR DE AULAS ### -->
         <div id="planejador-app" class="tab-content active">
-            <div class="text-center mb-6">
+            <div class="text-center mb-6 no-print">
                 <h2 class="text-3xl font-bold text-white">Assistente Didático</h2>
                 <p class="text-lg text-indigo-400 mt-1">Planeje Sua aula com IA</p>
             </div>
-            <form id="formPrompt" class="bg-slate-800 p-6 rounded-lg shadow-md mb-6 space-y-6">
+            <form id="formPrompt" class="bg-slate-800 p-6 rounded-lg shadow-md mb-6 space-y-6 no-print">
                  <!-- Campos do formulário do planejador (disciplina, série, tema, etc.) -->
                 <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 grid md:grid-cols-2 gap-4">
                     <div>
@@ -202,14 +213,17 @@
                     </button>
                 </div>
             </form>
-            <div id="planejador-loading" class="hidden text-center py-4">
+            <div id="planejador-loading" class="hidden text-center py-4 no-print">
                 <p class="text-indigo-400 font-medium"><i class="fas fa-spinner fa-spin mr-2"></i>Gemini está gerando seu plano... Aguarde.</p>
             </div>
             <div id="planejador-resultado" class="hidden mt-8">
-                 <div id="plano-impressao" class="bg-slate-800 p-8 rounded-lg shadow-md border border-slate-700">
-                    <h1 id="tituloPlano" class="text-2xl font-bold text-white border-b-2 border-indigo-500 pb-2 mb-4">Plano de Aula</h1>
-                    <div id="planoIA" class="prose prose-invert max-w-none"></div>
-                </div>
+                 <div class="bg-slate-800 p-8 rounded-lg shadow-md border border-slate-700 no-print">
+                     <div id="plano-impressao" class="bg-slate-800">
+                        <h1 id="tituloPlano" class="text-2xl font-bold text-white border-b-2 border-indigo-500 pb-2 mb-4">Plano de Aula</h1>
+                        <div id="planoIA" class="prose prose-invert max-w-none"></div>
+                    </div>
+                 </div>
+
                 <div class="mt-6 flex flex-wrap gap-3 justify-center no-print">
                     <button onclick="planejador_salvarPDF()" class="bg-green-600 hover:bg-green-700 text-white text-sm px-6 py-2 rounded-md shadow">
                         <i class="fas fa-print mr-2"></i>Salvar como PDF
@@ -311,9 +325,11 @@
                     </div>
                     <div>
                         <label for="prova-upload" class="block text-sm font-medium text-gray-300 mb-1">Prova do Aluno (Imagem ou PDF):</label>
-                        <input id="prova-upload" type="file" accept="image/*" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700">
+                        <!-- CORREÇÃO 3: Adicionado suporte a PDF -->
+                        <input id="prova-upload" type="file" accept="image/*,application/pdf" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700">
                         <div id="file-preview-container" class="mt-4 border-2 border-dashed border-slate-600 rounded-lg p-4 text-center hidden">
                             <img id="image-preview" src="#" alt="Pré-visualização" class="max-h-48 mx-auto hidden rounded"/>
+                            <p id="pdf-preview" class="hidden text-gray-400"><i class="fas fa-file-pdf text-3xl text-red-500 mb-2"></i><span id="pdf-name"></span></p>
                         </div>
                     </div>
                     <div class="mt-8 text-center">
@@ -336,7 +352,7 @@
     </main>
     
     <!-- MODAL CENTRAL DA API KEY -->
-    <div id="api-key-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
+    <div id="api-key-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50 no-print">
         <div class="bg-slate-800 rounded-lg shadow-xl p-6 w-full max-w-md mx-4 border border-slate-700">
             <h2 class="text-2xl font-bold mb-4 text-white">Configurar Chave API do Gemini</h2>
             <p class="text-gray-400 mb-4">Insira sua chave API do Google AI Studio para usar as ferramentas. Ela ficará salva no seu navegador.</p>
@@ -353,16 +369,16 @@
     </div>
 
      <!-- MODAL DE LOADING GLOBAL -->
-    <div id="loadingModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div id="loadingModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden no-print">
         <div class="bg-slate-800 rounded-xl p-8 max-w-md w-full mx-4 text-center border border-slate-700">
             <div class="animate-spin w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto mb-4"></div>
             <h3 class="text-lg font-semibold text-white mb-2">Gerando com IA...</h3>
-            <p class="text-gray-400">Aguarde enquanto criamos sua avaliação personalizada.</p>
+            <p class="text-gray-400">Aguarde um instante.</p>
         </div>
     </div>
     
     <!-- Toast Notification -->
-    <div id="toast-container" class="fixed top-5 right-5 z-[100] space-y-2"></div>
+    <div id="toast-container" class="fixed top-5 right-5 z-[100] space-y-2 no-print"></div>
 
 
 <script>
@@ -372,27 +388,18 @@
 let userApiKey = '';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Carrega a chave da API salva ao iniciar
     userApiKey = localStorage.getItem('geminiApiKey');
     if (!userApiKey) {
-        // Se não houver chave, abre o modal de boas-vindas
         setTimeout(() => openApiModal(), 1000);
     }
-
-    // Inicializa os event listeners de cada app
     initPlanejador();
     initGerador();
     initCorretor();
 });
 
 function showTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.getElementById(`${tabName}-app`).classList.add('active');
     document.getElementById(`tab-${tabName}`).classList.add('active');
 }
@@ -400,14 +407,10 @@ function showTab(tabName) {
 function openApiModal() {
     document.getElementById('api-key-modal').classList.remove('hidden');
     const savedKey = localStorage.getItem('geminiApiKey');
-    if(savedKey) {
-        document.getElementById('api-key-input').value = savedKey;
-    }
+    if(savedKey) document.getElementById('api-key-input').value = savedKey;
 }
 
-function closeApiModal() {
-    document.getElementById('api-key-modal').classList.add('hidden');
-}
+function closeApiModal() { document.getElementById('api-key-modal').classList.add('hidden'); }
 
 function saveApiKey() {
     const apiKey = document.getElementById('api-key-input').value.trim();
@@ -430,33 +433,15 @@ function checkApiKey() {
     return true;
 }
 
-// Função para mostrar toast (notificação)
 function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
-    const colors = {
-        success: 'bg-green-600',
-        danger: 'bg-red-600',
-        warning: 'bg-yellow-500',
-        info: 'bg-blue-600'
-    };
-    const icon = {
-        success: 'fa-check-circle',
-        danger: 'fa-times-circle',
-        warning: 'fa-exclamation-triangle',
-        info: 'fa-info-circle'
-    }
-
-    toast.className = `flex items-center space-x-3 text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full opacity-0`;
+    const colors = { success: 'bg-green-600', danger: 'bg-red-600', warning: 'bg-yellow-500', info: 'bg-blue-600' };
+    const icon = { success: 'fa-check-circle', danger: 'fa-times-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+    toast.className = `flex items-center space-x-3 text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full opacity-0 ${colors[type]}`;
     toast.innerHTML = `<i class="fas ${icon[type]}"></i><span>${message}</span>`;
-    toast.classList.add(colors[type]);
-    
     container.appendChild(toast);
-
-    setTimeout(() => {
-        toast.classList.remove('translate-x-full', 'opacity-0');
-    }, 100);
-
+    setTimeout(() => toast.classList.remove('translate-x-full', 'opacity-0'), 100);
     setTimeout(() => {
         toast.classList.add('translate-x-full', 'opacity-0');
         setTimeout(() => toast.remove(), 300);
@@ -470,43 +455,38 @@ function showToast(message, type = 'info') {
 function initPlanejador() {
     document.querySelectorAll('input[name="tipo"]').forEach(radio => {
         radio.addEventListener('change', function() {
-            const divUnidades = document.getElementById('divUnidades');
-            if (this.value === 'Unidade Temática' || this.value === 'Plano de Curso Anual') {
-                divUnidades.classList.remove('hidden');
-            } else {
-                divUnidades.classList.add('hidden');
-            }
+            document.getElementById('divUnidades').classList.toggle('hidden', this.value !== 'Unidade Temática' && this.value !== 'Plano de Curso Anual');
         });
     });
 }
 
 function planejador_iniciarGeracao() {
-    if (checkApiKey()) {
-        gerarPlanoComGemini();
-    }
+    if (checkApiKey()) gerarPlanoComGemini();
 }
 
 async function gerarPlanoComGemini() {
-    const escola = document.getElementById('escola').value;
-    const professor = document.getElementById('professor').value;
-    const turma = document.getElementById('turma').value;
-    const ano = document.getElementById('ano').value;
-    const disciplina = document.querySelector('input[name="disciplina"]:checked')?.value;
-    const serie = document.querySelector('input[name="serie"]:checked')?.value;
-    const tipo = document.querySelector('input[name="tipo"]:checked')?.value;
-    const duracao = document.querySelector('input[name="duracao"]:checked')?.value;
-    const tema = document.getElementById('tema').value;
-    const nivel = document.querySelector('input[name="nivel"]:checked')?.value;
-    const recursos = Array.from(document.querySelectorAll('.btn-check input[type="checkbox"]:checked')).map(el => el.value).join(', ');
-    const necessidades = document.getElementById('necessidades').value || 'nenhuma informada';
-    const objetivos = document.getElementById('objetivos-planejador').value || 'não especificado';
+    const dados = {
+        escola: document.getElementById('escola').value,
+        professor: document.getElementById('professor').value,
+        turma: document.getElementById('turma').value,
+        ano: document.getElementById('ano').value,
+        disciplina: document.querySelector('input[name="disciplina"]:checked')?.value,
+        serie: document.querySelector('input[name="serie"]:checked')?.value,
+        tipo: document.querySelector('input[name="tipo"]:checked')?.value,
+        duracao: document.querySelector('input[name="duracao"]:checked')?.value,
+        tema: document.getElementById('tema').value,
+        nivel: document.querySelector('input[name="nivel"]:checked')?.value,
+        recursos: Array.from(document.querySelectorAll('.btn-check input[type="checkbox"]:checked')).map(el => el.value).join(', '),
+        necessidades: document.getElementById('necessidades').value || 'nenhuma informada',
+        objetivos: document.getElementById('objetivos-planejador').value || 'não especificado'
+    };
 
-    if (!tema || !disciplina || !professor || !turma) {
+    if (!dados.tema || !dados.disciplina || !dados.professor || !dados.turma) {
         showToast('Preencha: Tema, Disciplina, Professor e Turma.', 'warning');
         return;
     }
 
-    const prompt = `Atue como um professor construtivista experiente. Crie um ${tipo.toLowerCase()} detalhado para ${disciplina}, ${serie}, com duração de ${duracao} minutos. Tema: "${tema}". Contexto: Escola: ${escola}, Professor: ${professor}, Turma: ${turma}, Ano: ${ano}, Nível da turma: ${nivel}, Necessidades específicas: ${necessidades}, Recursos disponíveis: ${recursos}. Objetivos pedagógicos: Aprendizagem significativa, estímulo à autonomia e pensamento crítico, avaliação formativa, inclusão e diversidade. Sua tarefa: 1. Identifique as habilidades da BNCC mais adequadas. 2. Estruture o plano com: Objetivo de Aprendizagem, Metodologia (etapas), Recursos, Atividade principal, Avaliação formativa, Orientações ao professor. Use linguagem clara, prática e inspiradora. Formate a resposta usando Markdown.`;
+    const prompt = `Atue como um professor construtivista experiente. Crie um ${dados.tipo.toLowerCase()} detalhado para ${dados.disciplina}, ${dados.serie}, com duração de ${dados.duracao} minutos. Tema: "${dados.tema}". Contexto: Escola: ${dados.escola}, Professor: ${dados.professor}, Turma: ${dados.turma}, Ano: ${dados.ano}, Nível da turma: ${dados.nivel}, Necessidades específicas: ${dados.necessidades}, Recursos disponíveis: ${dados.recursos}. Objetivos pedagógicos: Aprendizagem significativa, estímulo à autonomia e pensamento crítico, avaliação formativa, inclusão e diversidade. Sua tarefa: 1. Identifique as habilidades da BNCC mais adequadas. 2. Estruture o plano com: Objetivo de Aprendizagem, Metodologia (etapas), Recursos, Atividade principal, Avaliação formativa, Orientações ao professor. Use linguagem clara, prática e inspiradora. Formate a resposta usando Markdown.`;
     
     document.getElementById('planejador-loading').classList.remove('hidden');
     document.getElementById('planejador-resultado').classList.add('hidden');
@@ -515,18 +495,12 @@ async function gerarPlanoComGemini() {
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
-            })
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.7, maxOutputTokens: 2048 } })
         });
         const data = await response.json();
-        if (data.candidates && data.candidates[0].content) {
-            const texto = data.candidates[0].content.parts[0].text;
-            planejador_exibirPlano(texto, { tipo, tema });
-        } else {
-            throw new Error(data.error?.message || 'Erro na resposta do Gemini.');
-        }
+        if (!response.ok || (data.candidates && data.candidates[0].finishReason !== 'STOP')) throw new Error(data.error?.message || 'A resposta da IA foi incompleta ou continha conteúdo bloqueado.');
+        const texto = data.candidates[0].content.parts[0].text;
+        planejador_exibirPlano(texto, dados);
     } catch (err) {
         showToast(`Erro: ${err.message}`, 'danger');
     } finally {
@@ -551,12 +525,9 @@ function planejador_salvarPDF() { window.print(); }
 
 function planejador_copiarPlano() {
     const plano = document.getElementById('plano-impressao').innerText;
-    navigator.clipboard.writeText(plano).then(() => {
-        showToast('Plano copiado!', 'success');
-    }).catch(err => {
-        showToast('Falha ao copiar.', 'danger');
-    });
+    navigator.clipboard.writeText(plano).then(() => showToast('Plano copiado!', 'success'), () => showToast('Falha ao copiar.', 'danger'));
 }
+
 
 // ===================================================================================
 // LÓGICA DO APLICATIVO 2: GERADOR DE PROVAS
@@ -606,20 +577,13 @@ async function gerador_chamarGemini(dados) {
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${userApiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { responseMimeType: "application/json" }
-        })
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } })
     });
 
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Erro na API: ${errorData.error.message}`);
-    }
-
+    if (!response.ok) throw new Error(`Erro na API: ${(await response.json()).error.message}`);
     const result = await response.json();
-    const iaResponseText = result.candidates[0].content.parts[0].text;
-    return gerador_processarRespostaIA(iaResponseText, dados);
+    if (result.candidates[0].finishReason !== 'STOP') throw new Error('A resposta da IA foi incompleta ou bloqueada.');
+    return gerador_processarRespostaIA(result.candidates[0].content.parts[0].text, dados);
 }
 
 function gerador_processarRespostaIA(resposta, dados) {
@@ -631,17 +595,25 @@ function gerador_processarRespostaIA(resposta, dados) {
             disciplina: dados.disciplina,
             serie: dados.serie,
             tema: dados.tema,
-            dataGeracao: new Date().toISOString(),
             questoes: dadosIA.questoes || []
         };
     } catch (error) {
-        throw new Error("A IA retornou uma resposta em formato inválido.");
+        throw new Error("A IA retornou uma resposta em formato JSON inválido.");
     }
 }
-
+// CORREÇÃO 2: Função de exibir prova melhorada
 function gerador_exibirProva(prova) {
     const preview = document.getElementById('provaPreview');
-    let html = `<div class="text-left"><h4 class="font-bold text-lg text-white">${prova.titulo}</h4><p class="text-sm text-gray-400">${prova.serie} • ${prova.questoes?.length || 0} questões</p></div>`;
+    let html = `<div class="text-left space-y-4">
+        <div>
+            <h4 class="font-bold text-lg text-white">${prova.titulo}</h4>
+            <p class="text-sm text-gray-400">${prova.serie} • ${prova.questoes?.length || 0} questões</p>
+        </div>
+        <div class="mt-4 pt-4 border-t border-slate-700 flex space-x-2">
+            <button onclick="gerador_exportarAvaliacao(${prova.id})" class="flex-1 bg-indigo-600 text-white py-2 px-3 rounded-md text-sm hover:bg-opacity-90"><i class="fas fa-download mr-1"></i>Exportar</button>
+            <button onclick="gerador_visualizarCompleta(${prova.id})" class="flex-1 bg-slate-600 text-white py-2 px-3 rounded-md text-sm hover:bg-opacity-90"><i class="fas fa-eye mr-1"></i>Ver Completa</button>
+        </div>
+    </div>`;
     preview.innerHTML = html;
 }
 
@@ -649,6 +621,60 @@ function gerador_salvarAvaliacao(avaliacao) {
     gerador_avaliacoes.unshift(avaliacao);
     if (gerador_avaliacoes.length > 50) gerador_avaliacoes.pop();
     localStorage.setItem('avaliacoes', JSON.stringify(gerador_avaliacoes));
+}
+
+// Funções de suporte para o Gerador de Provas
+function gerador_visualizarCompleta(id) {
+    const avaliacao = gerador_avaliacoes.find(a => a.id === id);
+    if (!avaliacao) return;
+
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4 no-print';
+    modal.onclick = (e) => { if(e.target === modal) modal.remove(); };
+    
+    let questoesHtml = avaliacao.questoes.map(q => `
+        <div class="border border-slate-700 rounded-lg p-4 mb-4 bg-slate-900/50">
+            <p class="font-semibold text-gray-300">Questão ${q.numero}</p>
+            <p class="text-gray-200 my-2">${q.enunciado}</p>
+            ${q.alternativas ? `<div class="text-sm text-gray-400 space-y-1 ml-4">${q.alternativas.map(alt => `<div>${alt}</div>`).join('')}</div><div class="mt-2 text-sm text-green-400 bg-green-900/50 p-2 rounded"><strong>Resposta:</strong> ${q.resposta}</div>` : ''}
+        </div>`).join('');
+    
+    modal.innerHTML = `
+        <div class="bg-slate-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-slate-600">
+            <div class="flex justify-between items-center p-6 border-b border-slate-700">
+                <h3 class="text-xl font-bold text-white">${avaliacao.titulo}</h3>
+                <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1">${questoesHtml}</div>
+            <div class="p-6 border-t border-slate-700 bg-slate-900/50">
+                <button onclick="gerador_exportarAvaliacao(${avaliacao.id})" class="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-opacity-90"><i class="fas fa-download mr-2"></i>Exportar Prova</button>
+            </div>
+        </div>`;
+    document.body.appendChild(modal);
+}
+
+function gerador_exportarAvaliacao(id) {
+    const avaliacao = gerador_avaliacoes.find(a => a.id === id);
+    if (!avaliacao) return;
+    
+    let html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>${avaliacao.titulo}</title><style>body{font-family: Arial, sans-serif; margin: 40px; line-height: 1.6;} .header{text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px;} .questao{margin-bottom: 25px; page-break-inside: avoid;} .numero{font-weight: bold;} .alternativas{margin-left: 20px;} @media print{body{margin: 20px;}}</style></head><body><div class="header"><h1>Avaliação</h1><h2>${avaliacao.titulo}</h2><p><strong>Disciplina:</strong> ${avaliacao.disciplina} | <strong>Série:</strong> ${avaliacao.serie}</p><p><strong>Data:</strong> ___/___/______ | <strong>Valor:</strong> _____</p><p style="text-align:left;"><strong>Nome:</strong> __________________________________________________________________</p></div>`;
+    avaliacao.questoes.forEach(q => {
+        html += `<div class="questao"><p><span class="numero">${q.numero})</span> ${q.enunciado}</p>`;
+        if (q.alternativas) html += `<div class="alternativas">${q.alternativas.map(alt => `<div>${alt}</div>`).join('')}</div>`;
+        else html += `<br><br><br><br>`;
+        html += '</div>';
+    });
+    html += `</body></html>`;
+
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${avaliacao.titulo.replace(/[^a-zA-Z0-9]/g, '_')}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+    a.remove();
+    showToast('Download da prova iniciado!', 'success');
 }
 
 
@@ -660,6 +686,8 @@ let corretor_uploadedFile = null;
 function initCorretor() {
     const provaUploadInput = document.getElementById('prova-upload');
     const imagePreview = document.getElementById('image-preview');
+    const pdfPreview = document.getElementById('pdf-preview');
+    const pdfName = document.getElementById('pdf-name');
     const filePreviewContainer = document.getElementById('file-preview-container');
 
     provaUploadInput.addEventListener('change', (event) => {
@@ -671,33 +699,38 @@ function initCorretor() {
         }
         const reader = new FileReader();
         reader.onloadend = () => {
-            corretor_uploadedFile = {
-                mimeType: file.type,
-                data: reader.result.split(',')[1]
-            };
+            corretor_uploadedFile = { mimeType: file.type, data: reader.result.split(',')[1] };
+            
+            // CORREÇÃO 3: Lógica para exibir preview de imagem ou PDF
+            imagePreview.classList.add('hidden');
+            pdfPreview.classList.add('hidden');
+
             if (file.type.startsWith('image/')) {
                 imagePreview.src = reader.result;
                 imagePreview.classList.remove('hidden');
-                filePreviewContainer.classList.remove('hidden');
+            } else if (file.type === 'application/pdf') {
+                pdfName.textContent = file.name;
+                pdfPreview.classList.remove('hidden');
             } else {
-                showToast('Tipo de arquivo não suportado. Por favor, envie uma imagem.', 'warning');
+                showToast('Tipo de arquivo não suportado. Por favor, envie uma imagem ou PDF.', 'warning');
                 corretor_uploadedFile = null;
                 filePreviewContainer.classList.add('hidden');
+                return;
             }
+            filePreviewContainer.classList.remove('hidden');
         };
         reader.readAsDataURL(file);
     });
 
     document.getElementById('corrigir-btn').addEventListener('click', async () => {
-        if (!checkApiKey()) return;
+        if (!checkApiKey() || !corretor_uploadedFile) {
+            showToast('Verifique a chave API e o arquivo da prova.', 'warning');
+            return;
+        }
 
         const gabarito = document.getElementById('gabarito').value.trim();
         if (!gabarito) {
             showToast('Insira o gabarito da prova.', 'warning');
-            return;
-        }
-        if (!corretor_uploadedFile) {
-            showToast('Faça o upload da imagem da prova.', 'warning');
             return;
         }
 
@@ -712,30 +745,20 @@ function initCorretor() {
         btn.disabled = true;
         btn.textContent = 'Corrigindo...';
         
-        const prompt = `Você é um assistente de professor para correção de provas. Analise a imagem da prova do aluno e compare com o gabarito oficial. Gabarito: """${gabarito}""". Instruções: 1. Corrija cada questão. 2. Indique "Certa" ou "Errada". 3. Se errada, explique o erro. 4. Apresente um resumo de acertos/erros. 5. Calcule uma nota de 0 a 10. 6. Use formatação Markdown.`;
+        const prompt = `Você é um assistente de professor para correção de provas. Analise o arquivo da prova do aluno (imagem ou PDF) e compare-o com o gabarito oficial fornecido. Gabarito Oficial: """${gabarito}""". Instruções: 1. Corrija cada questão da prova do aluno, uma por uma. 2. Para cada questão, indique claramente se está "Certa" ou "Errada". 3. Se uma resposta estiver errada, forneça uma breve e clara explicação do erro. 4. Ao final, apresente um resumo com o número de acertos e erros. 5. Calcule e exiba uma nota final de 0 a 10, proporcional ao número de acertos. 6. Use formatação Markdown (títulos, negrito e listas) para organizar a resposta de forma clara e legível.`;
 
         try {
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [
-                            { text: prompt },
-                            { inline_data: { mime_type: corretor_uploadedFile.mimeType, data: corretor_uploadedFile.data } }
-                        ]
-                    }]
-                })
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: corretor_uploadedFile.mimeType, data: corretor_uploadedFile.data } } ] }] })
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`Erro da API: ${errorData.error.message}`);
-            }
-
+            if (!response.ok) throw new Error(`Erro da API: ${(await response.json()).error.message}`);
             const data = await response.json();
-            const aiResponse = data.candidates[0].content.parts[0].text;
-            output.innerHTML = marked.parse(aiResponse);
+            if (data.candidates[0].finishReason !== 'STOP') throw new Error('A resposta da IA foi incompleta ou bloqueada.');
+            
+            output.innerHTML = marked.parse(data.candidates[0].content.parts[0].text);
 
         } catch (error) {
             showToast(`Falha na correção: ${error.message}`, 'danger');
@@ -752,24 +775,12 @@ function initCorretor() {
 // Estilos para os radio buttons e checkboxes do planejador (para dark mode)
 const style = document.createElement('style');
 style.textContent = `
-    .btn-radio {
-      @apply bg-slate-700 border border-slate-600 rounded-lg p-3 text-center text-sm shadow-sm hover:shadow-lg cursor-pointer transition;
-    }
-    .btn-radio input[type="radio"]:checked + .btn-label {
-      @apply border-indigo-500 bg-indigo-900/50 font-semibold text-indigo-300;
-    }
-    .btn-label {
-      @apply block w-full h-full border-2 border-transparent rounded-md p-2 transition text-gray-300;
-    }
-    .btn-check {
-      @apply bg-slate-700 border border-slate-600 rounded p-2 text-sm shadow-sm hover:shadow-lg cursor-pointer transition;
-    }
-    .btn-check input[type="checkbox"]:checked + .check-label {
-      @apply bg-indigo-900/50 border-indigo-500 text-indigo-300 font-medium;
-    }
-    .check-label {
-      @apply block w-full border-2 border-transparent rounded p-2 transition text-gray-300;
-    }
+    .btn-radio { @apply bg-slate-700 border border-slate-600 rounded-lg p-3 text-center text-sm shadow-sm hover:shadow-lg cursor-pointer transition; }
+    .btn-radio input[type="radio"]:checked + .btn-label { @apply border-indigo-500 bg-indigo-900/50 font-semibold text-indigo-300; }
+    .btn-label { @apply block w-full h-full border-2 border-transparent rounded-md p-2 transition text-gray-300; }
+    .btn-check { @apply bg-slate-700 border border-slate-600 rounded p-2 text-sm shadow-sm hover:shadow-lg cursor-pointer transition; }
+    .btn-check input[type="checkbox"]:checked + .check-label { @apply bg-indigo-900/50 border-indigo-500 text-indigo-300 font-medium; }
+    .check-label { @apply block w-full border-2 border-transparent rounded p-2 transition text-gray-300; }
 `;
 document.head.appendChild(style);
 
@@ -777,3 +788,4 @@ document.head.appendChild(style);
 </script>
 </body>
 </html>
+
