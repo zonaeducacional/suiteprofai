@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suite Pedagógica IA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        /* Estilos personalizados para complementar o Tailwind */
+        body {
+            background-color: #0f172a; /* slate-900 */
+        }
+        .tab-btn.active {
+            border-color: #4f46e5; /* indigo-600 */
+            color: #4f46e5;
+            background-color: rgba(79, 70, 229, 0.1);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        /* Estilos de impressão para o planejador */
+        @media print {
+            .no-print, .no-print * { display: none !important; }
+            body { background: white !important; }
+            #plano-impressao {
+                color: black;
+                background: white;
+                box-shadow: none;
+                border: none;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            #plano-impressao h1, #plano-impressao h2 { color: black; }
+        }
+    </style>
+</head>
+<body class="text-gray-300">
+
+    <!-- CABEÇALHO E NAVEGAÇÃO -->
+    <header class="bg-slate-800/50 backdrop-blur-sm shadow-md sticky top-0 z-40 border-b border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-brain text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-white">Suite Pedagógica IA</h1>
+                        <p class="text-sm text-indigo-400">Suas ferramentas de ensino em um só lugar</p>
+                    </div>
+                </div>
+                <button onclick="openApiModal()" class="text-gray-400 hover:text-white" title="Configurar Chave API">
+                    <i class="fas fa-cog text-xl"></i>
+                </button>
+            </div>
+            <nav class="flex space-x-4">
+                <button onclick="showTab('planejador')" id="tab-planejador" class="tab-btn active font-medium py-2 px-4 border-b-2 rounded-t-md">
+                    <i class="fas fa-calendar-alt mr-2"></i>Planejador
+                </button>
+                <button onclick="showTab('gerador')" id="tab-gerador" class="tab-btn font-medium py-2 px-4 border-b-2 border-transparent rounded-t-md">
+                    <i class="fas fa-file-alt mr-2"></i>Gerador de Provas
+                </button>
+                <button onclick="showTab('corretor')" id="tab-corretor" class="tab-btn font-medium py-2 px-4 border-b-2 border-transparent rounded-t-md">
+                    <i class="fas fa-check-double mr-2"></i>Corretor de Provas
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- ### CONTEÚDO DO PLANEJADOR DE AULAS ### -->
+        <div id="planejador-app" class="tab-content active">
+            <div class="text-center mb-6">
+                <h2 class="text-3xl font-bold text-white">Assistente Didático</h2>
+                <p class="text-lg text-indigo-400 mt-1">Planeje Sua aula com IA</p>
+            </div>
+            <form id="formPrompt" class="bg-slate-800 p-6 rounded-lg shadow-md mb-6 space-y-6">
+                 <!-- Campos do formulário do planejador (disciplina, série, tema, etc.) -->
+                <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Escola</label>
+                        <input type="text" id="escola" value="Escola Januário Eleodoro de Lima" class="w-full bg-slate-700 border border-slate-600 rounded p-2 text-sm text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Professor</label>
+                        <input type="text" id="professor" placeholder="Seu nome" class="w-full bg-slate-700 border border-slate-600 rounded p-2 text-sm text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Turma</label>
+                        <input type="text" id="turma" placeholder="Ex: 8º Ano B ou EJA" class="w-full bg-slate-700 border border-slate-600 rounded p-2 text-sm text-white">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Ano</label>
+                        <input type="number" id="ano" value="2025" class="w-full bg-slate-700 border border-slate-600 rounded p-2 text-sm text-white">
+                    </div>
+                </div>
+                <!-- Preservando todos os campos originais -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Disciplina</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+                        <label class="btn-radio"><input type="radio" name="disciplina" value="Língua Portuguesa" required> <span class="btn-label">Língua Portuguesa</span></label>
+                        <label class="btn-radio"><input type="radio" name="disciplina" value="LPT - Literatura e Produção Textual"> <span class="btn-label">LPT</span></label>
+                        <label class="btn-radio"><input type="radio" name="disciplina" value="Matemática"> <span class="btn-label">Matemática</span></label>
+                        <label class="btn-radio"><input type="radio" name="disciplina" value="Ciências"> <span class="btn-label">Ciências</span></label>
+                        <label class="btn-radio"><input type="radio" name="disciplina" value="História"> <span class="btn-label">História</span></label>
+                        <label class="btn-radio"><input type="radio" name="disciplina" value="Geografia"> <span class="btn-label">Geografia</span></label>
+                        <label class="btn-radio"><input type="radio" name="disciplina" value="Inglês"> <span class="btn-label">Inglês</span></label>
+                        <label class="btn-radio"><input type="radio" name="disciplina" value="Artes"> <span class="btn-label">Artes</span></label>
+                        <label class="btn-radio"><input type="radio" name="disciplina" value="Educação Física"> <span class="btn-label">Ed. Física</span></label>
+                        <label class="btn-radio"><input type="radio" name="disciplina" value="Ensino Religioso"> <span class="btn-label">Ensino Religioso</span></label>
+                    </div>
+                </div>
+                <hr class="border-slate-700">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Série</label>
+                    <div class="grid grid-cols-5 gap-2">
+                        <label class="btn-radio"><input type="radio" name="serie" value="6º ano" required> <span class="btn-label">6º</span></label>
+                        <label class="btn-radio"><input type="radio" name="serie" value="7º ano"> <span class="btn-label">7º</span></label>
+                        <label class="btn-radio"><input type="radio" name="serie" value="8º ano"> <span class="btn-label">8º</span></label>
+                        <label class="btn-radio"><input type="radio" name="serie" value="9º ano"> <span class="btn-label">9º</span></label>
+                        <label class="btn-radio"><input type="radio" name="serie" value="EJA"> <span class="btn-label">EJA</span></label>
+                    </div>
+                </div>
+                 <hr class="border-slate-700">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Tipo</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        <label class="btn-radio"><input type="radio" name="tipo" value="Plano de Aula" required> <span class="btn-label">Plano de Aula</span></label>
+                        <label class="btn-radio"><input type="radio" name="tipo" value="Unidade Temática"> <span class="btn-label">Plano de Unidade</span></label>
+                        <label class="btn-radio"><input type="radio" name="tipo" value="Plano de Curso Anual"> <span class="btn-label">Plano de Curso Anual</span></label>
+                        <label class="btn-radio"><input type="radio" name="tipo" value="Atividade Isolada"> <span class="btn-label">Atividade</span></label>
+                        <label class="btn-radio"><input type="radio" name="tipo" value="Projeto Interdisciplinar"> <span class="btn-label">Projeto Didático</span></label>
+                        <label class="btn-radio"><input type="radio" name="tipo" value="Sequência Didática"> <span class="btn-label">Sequência Didática</span></label>
+                    </div>
+                </div>
+                <hr class="border-slate-700">
+                <div id="divUnidades" class="hidden">
+                  <label class="block text-sm font-medium text-gray-300 mb-2">Número de Unidades Letivas</label>
+                  <div class="grid grid-cols-3 gap-2">
+                    <label class="btn-radio"><input type="radio" name="unidades" value="1"> <span class="btn-label">1 Unidade</span></label>
+                    <label class="btn-radio"><input type="radio" name="unidades" value="2"> <span class="btn-label">2 Unidades</span></label>
+                    <label class="btn-radio"><input type="radio" name="unidades" value="3"> <span class="btn-label">3 Unidades</span></label>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-300 mb-2">Duração (min)</label>
+                  <div class="grid grid-cols-2 gap-2">
+                    <label class="btn-radio"><input type="radio" name="duracao" value="45" required> <span class="btn-label">45 min</span></label>
+                    <label class="btn-radio"><input type="radio" name="duracao" value="90"> <span class="btn-label">90 min</span></label>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-300 mb-1">Tema ou Conteúdo</label>
+                  <input type="text" id="tema" placeholder="Ex: sistema digestório, crônicas, ética nas redes..." class="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-300 mb-2">Nível da Turma</label>
+                  <div class="grid grid-cols-3 gap-2">
+                    <label class="btn-radio"><input type="radio" name="nivel" value="Básico" required> <span class="btn-label">Básico</span></label>
+                    <label class="btn-radio"><input type="radio" name="nivel" value="Intermediário"> <span class="btn-label">Intermediário</span></label>
+                    <label class="btn-radio"><input type="radio" name="nivel" value="Avançado"> <span class="btn-label">Avançado</span></label>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-300 mb-2">Recursos Disponíveis</label>
+                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <label class="btn-check"><input type="checkbox" value="Internet"> <span class="check-label">Internet</span></label>
+                    <label class="btn-check"><input type="checkbox" value="Projetor"> <span class="check-label">Projetor</span></label>
+                    <label class="btn-check"><input type="checkbox" value="Laboratório"> <span class="check-label">Laboratório</span></label>
+                    <label class="btn-check"><input type="checkbox" value="Tablets"> <span class="check-label">Tablets</span></label>
+                    <label class="btn-check"><input type="checkbox" value="Impressora"> <span class="check-label">Impressora</span></label>
+                    <label class="btn-check"><input type="checkbox" value="TV"> <span class="check-label">TV</span></label>
+                    <label class="btn-check"><input type="checkbox" value="Computador"> <span class="check-label">Computador</span></label>
+                    <label class="btn-check"><input type="checkbox" value="Celular dos alunos"> <span class="check-label">Celular</span></label>
+                    <label class="btn-check"><input type="checkbox" value="Papel e caneta"> <span class="check-label">Papel</span></label>
+                    <label class="btn-check"><input type="checkbox" value="Giz e lousa"> <span class="check-label">Piloto</span></label>
+                    <label class="btn-check"><input type="checkbox" value="Sem recursos digitais"> <span class="check-label">Sem digital</span></label>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-300 mb-1">Necessidades Específicas</label>
+                  <input type="text" id="necessidades" placeholder="Ex: surdez, TDHA, dislexia..." class="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-300 mb-1">Objetivos Específicos (opcional)</label>
+                  <textarea id="objetivos-planejador" rows="2" class="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white" placeholder="Ex: promover empatia, usar linguagem acessível..."></textarea>
+                </div>
+                <div class="mt-6 flex flex-wrap gap-3 justify-center">
+                    <button type="button" onclick="planejador_iniciarGeracao()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded-md shadow transition">
+                    <i class="fas fa-magic mr-2"></i>Gerar Plano com Gemini
+                    </button>
+                    <button type="button" onclick="planejador_limparTudo()" class="bg-slate-600 hover:bg-slate-500 text-white font-semibold px-6 py-2 rounded-md shadow transition">
+                    <i class="fas fa-eraser mr-2"></i>Limpar Campos
+                    </button>
+                </div>
+            </form>
+            <div id="planejador-loading" class="hidden text-center py-4">
+                <p class="text-indigo-400 font-medium"><i class="fas fa-spinner fa-spin mr-2"></i>Gemini está gerando seu plano... Aguarde.</p>
+            </div>
+            <div id="planejador-resultado" class="hidden mt-8">
+                 <div id="plano-impressao" class="bg-slate-800 p-8 rounded-lg shadow-md border border-slate-700">
+                    <h1 id="tituloPlano" class="text-2xl font-bold text-white border-b-2 border-indigo-500 pb-2 mb-4">Plano de Aula</h1>
+                    <div id="planoIA" class="prose prose-invert max-w-none"></div>
+                </div>
+                <div class="mt-6 flex flex-wrap gap-3 justify-center no-print">
+                    <button onclick="planejador_salvarPDF()" class="bg-green-600 hover:bg-green-700 text-white text-sm px-6 py-2 rounded-md shadow">
+                        <i class="fas fa-print mr-2"></i>Salvar como PDF
+                    </button>
+                    <button onclick="planejador_copiarPlano()" class="bg-blue-600 hover:bg-blue-500 text-white text-sm px-6 py-2 rounded-md shadow">
+                        <i class="fas fa-copy mr-2"></i>Copiar Plano
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ### CONTEÚDO DO GERADOR DE PROVAS ### -->
+        <div id="gerador-app" class="tab-content">
+           <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 bg-slate-800 rounded-xl shadow-lg border border-slate-700 p-6">
+                     <h2 class="text-2xl font-bold text-white mb-6"><i class="fas fa-file-alt text-indigo-400 mr-3"></i>Criar Prova com IA</h2>
+                     <form id="provaForm" class="space-y-6">
+                        <!-- Todos os campos do gerador de provas -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="disciplina-gerador" class="block text-sm font-medium text-gray-300 mb-2">Disciplina</label>
+                                <select id="disciplina-gerador" class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                    <option>História</option><option>Geografia</option><option>Português</option><option>Matemática</option><option>Ciências</option><option>Inglês</option><option>Arte</option><option>Educação Física</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="serie-gerador" class="block text-sm font-medium text-gray-300 mb-2">Ano/Série</label>
+                                <select id="serie-gerador" class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                    <option>6º Ano</option><option>7º Ano</option><option>8º Ano</option><option>9º Ano</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="tema-gerador" class="block text-sm font-medium text-gray-300 mb-2">Tema/Conteúdo</label>
+                            <input type="text" id="tema-gerador" placeholder="Ex: Revolução Industrial, Idade Média, etc." class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        </div>
+                        <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
+                             <textarea id="textoBase" rows="6" placeholder="Cole aqui o texto, artigo, capítulo do livro..." class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none text-sm"></textarea>
+                        </div>
+                         <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
+                                <h3 class="font-semibold text-white mb-4">Configurações da Prova</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="numQuestoes" class="block text-sm font-medium text-gray-300 mb-2">Nº de Questões</label>
+                                        <select id="numQuestoes" class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg">
+                                            <option>5</option><option selected>10</option><option>15</option><option>20</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="dificuldade" class="block text-sm font-medium text-gray-300 mb-2">Dificuldade</label>
+                                        <select id="dificuldade" class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg">
+                                            <option>Fácil</option><option selected>Médio</option><option>Difícil</option><option>Misto</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-3">Tipos de Questão</label>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <label class="flex items-center space-x-2 cursor-pointer"><input type="checkbox" name="tipoQuestao" value="Múltipla Escolha" checked class="rounded bg-slate-600 border-slate-500 text-indigo-500 focus:ring-indigo-500"><span class="text-sm">Múltipla Escolha</span></label>
+                                <label class="flex items-center space-x-2 cursor-pointer"><input type="checkbox" name="tipoQuestao" value="Verdadeiro/Falso" class="rounded bg-slate-600 border-slate-500 text-indigo-500 focus:ring-indigo-500"><span class="text-sm">Verdadeiro/Falso</span></label>
+                                <label class="flex items-center space-x-2 cursor-pointer"><input type="checkbox" name="tipoQuestao" value="Dissertativa" checked class="rounded bg-slate-600 border-slate-500 text-indigo-500 focus:ring-indigo-500"><span class="text-sm">Dissertativa</span></label>
+                                <label class="flex items-center space-x-2 cursor-pointer"><input type="checkbox" name="tipoQuestao" value="Completar" class="rounded bg-slate-600 border-slate-500 text-indigo-500 focus:ring-indigo-500"><span class="text-sm">Completar</span></label>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="objetivos-gerador" class="block text-sm font-medium text-gray-300 mb-2">Objetivos de Aprendizagem (Opcional)</label>
+                            <textarea id="objetivos-gerador" rows="3" placeholder="Descreva os objetivos que a prova deve avaliar..." class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"></textarea>
+                        </div>
+                        <div class="flex space-x-4">
+                            <button type="button" onclick="gerador_gerarProva()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-lg font-semibold shadow-lg transition-all">
+                                <i class="fas fa-magic mr-2"></i>Gerar Prova com IA
+                            </button>
+                        </div>
+                     </form>
+                </div>
+                <div class="lg:col-span-1 bg-slate-800 rounded-xl shadow-lg border border-slate-700 p-6 sticky top-28">
+                    <h3 class="text-lg font-semibold text-white mb-4"><i class="fas fa-eye text-indigo-400 mr-2"></i>Preview da Prova</h3>
+                    <div id="provaPreview" class="text-center text-gray-500 py-8">
+                        <i class="fas fa-file-alt text-4xl mb-4 opacity-50"></i>
+                        <p>A prova aparecerá aqui após a geração</p>
+                    </div>
+                </div>
+           </div>
+        </div>
+
+        <!-- ### CONTEÚDO DO CORRETOR DE PROVAS ### -->
+        <div id="corretor-app" class="tab-content">
+            <div class="text-center mb-6">
+                <h2 class="text-3xl font-bold text-white">Corretor de Provas com IA</h2>
+                <p class="text-lg text-indigo-400 mt-1">Faça o upload da prova, insira o gabarito e deixe a IA fazer o resto.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-slate-800 p-6 rounded-lg shadow-lg border border-slate-700">
+                    <h3 class="text-2xl font-bold mb-4 text-white">1. Forneça os Dados</h3>
+                    <div class="mb-6">
+                        <label for="gabarito" class="block text-sm font-medium text-gray-300 mb-1">Gabarito da Prova:</label>
+                        <textarea id="gabarito" rows="8" class="w-full p-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ex:&#10;1. c) Revolução Francesa&#10;2. A capital do Brasil é Brasília.&#10;3. V, F, V, F"></textarea>
+                    </div>
+                    <div>
+                        <label for="prova-upload" class="block text-sm font-medium text-gray-300 mb-1">Prova do Aluno (Imagem ou PDF):</label>
+                        <input id="prova-upload" type="file" accept="image/*" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700">
+                        <div id="file-preview-container" class="mt-4 border-2 border-dashed border-slate-600 rounded-lg p-4 text-center hidden">
+                            <img id="image-preview" src="#" alt="Pré-visualização" class="max-h-48 mx-auto hidden rounded"/>
+                        </div>
+                    </div>
+                    <div class="mt-8 text-center">
+                        <button id="corrigir-btn" class="w-full md:w-auto px-8 py-3 bg-indigo-600 text-white font-bold rounded-lg shadow-md hover:bg-indigo-700 disabled:bg-slate-500 transition-colors">
+                            Corrigir Prova
+                        </button>
+                    </div>
+                </div>
+                 <div class="bg-slate-800 p-6 rounded-lg shadow-lg border border-slate-700">
+                    <h3 class="text-2xl font-bold text-white mb-4">2. Resultado da Correção</h3>
+                    <div id="corretor-resultado-container" class="prose prose-invert max-w-none text-gray-300">
+                         <div id="corretor-loader" class="hidden mx-auto my-8 h-12 w-12 ease-linear rounded-full border-4 border-t-4 border-slate-600 border-t-indigo-500 animate-spin"></div>
+                        <p id="corretor-placeholder">O resultado da correção aparecerá aqui.</p>
+                        <div id="corretor-resultado-output"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+    
+    <!-- MODAL CENTRAL DA API KEY -->
+    <div id="api-key-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
+        <div class="bg-slate-800 rounded-lg shadow-xl p-6 w-full max-w-md mx-4 border border-slate-700">
+            <h2 class="text-2xl font-bold mb-4 text-white">Configurar Chave API do Gemini</h2>
+            <p class="text-gray-400 mb-4">Insira sua chave API do Google AI Studio para usar as ferramentas. Ela ficará salva no seu navegador.</p>
+            <label for="api-key-input" class="block text-sm font-medium text-gray-300">Sua Chave:</label>
+            <input type="password" id="api-key-input" class="mt-1 block w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md shadow-sm placeholder-gray-400 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+             <p class="text-xs text-slate-400 mt-1">
+                <a href="https://makersuite.google.com/app/apikey" target="_blank" class="text-indigo-400 hover:underline">Não tem uma chave? Obtenha uma gratuitamente aqui.</a>
+            </p>
+            <div class="mt-6 flex justify-end space-x-4">
+                <button onclick="closeApiModal()" class="px-4 py-2 bg-slate-600 text-white rounded-md hover:bg-slate-500">Fechar</button>
+                <button onclick="saveApiKey()" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Salvar Chave</button>
+            </div>
+        </div>
+    </div>
+
+     <!-- MODAL DE LOADING GLOBAL -->
+    <div id="loadingModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-slate-800 rounded-xl p-8 max-w-md w-full mx-4 text-center border border-slate-700">
+            <div class="animate-spin w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <h3 class="text-lg font-semibold text-white mb-2">Gerando com IA...</h3>
+            <p class="text-gray-400">Aguarde enquanto criamos sua avaliação personalizada.</p>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[100] space-y-2"></div>
+
+
+<script>
+// ===================================================================================
+// CONTROLE GERAL DA SUITE (NAVEGAÇÃO, API KEY, ETC.)
+// ===================================================================================
+let userApiKey = '';
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Carrega a chave da API salva ao iniciar
+    userApiKey = localStorage.getItem('geminiApiKey');
+    if (!userApiKey) {
+        // Se não houver chave, abre o modal de boas-vindas
+        setTimeout(() => openApiModal(), 1000);
+    }
+
+    // Inicializa os event listeners de cada app
+    initPlanejador();
+    initGerador();
+    initCorretor();
+});
+
+function showTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    document.getElementById(`${tabName}-app`).classList.add('active');
+    document.getElementById(`tab-${tabName}`).classList.add('active');
+}
+
+function openApiModal() {
+    document.getElementById('api-key-modal').classList.remove('hidden');
+    const savedKey = localStorage.getItem('geminiApiKey');
+    if(savedKey) {
+        document.getElementById('api-key-input').value = savedKey;
+    }
+}
+
+function closeApiModal() {
+    document.getElementById('api-key-modal').classList.add('hidden');
+}
+
+function saveApiKey() {
+    const apiKey = document.getElementById('api-key-input').value.trim();
+    if (apiKey) {
+        localStorage.setItem('geminiApiKey', apiKey);
+        userApiKey = apiKey;
+        showToast('Chave da API salva com sucesso!', 'success');
+        closeApiModal();
+    } else {
+        showToast('Por favor, insira uma chave da API válida.', 'warning');
+    }
+}
+
+function checkApiKey() {
+    if (!userApiKey) {
+        showToast('Por favor, configure sua chave de API primeiro.', 'danger');
+        openApiModal();
+        return false;
+    }
+    return true;
+}
+
+// Função para mostrar toast (notificação)
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    const colors = {
+        success: 'bg-green-600',
+        danger: 'bg-red-600',
+        warning: 'bg-yellow-500',
+        info: 'bg-blue-600'
+    };
+    const icon = {
+        success: 'fa-check-circle',
+        danger: 'fa-times-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+    }
+
+    toast.className = `flex items-center space-x-3 text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full opacity-0`;
+    toast.innerHTML = `<i class="fas ${icon[type]}"></i><span>${message}</span>`;
+    toast.classList.add(colors[type]);
+    
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.remove('translate-x-full', 'opacity-0');
+    }, 100);
+
+    setTimeout(() => {
+        toast.classList.add('translate-x-full', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+    }, 3500);
+}
+
+
+// ===================================================================================
+// LÓGICA DO APLICATIVO 1: PLANEJADOR DE AULAS
+// ===================================================================================
+function initPlanejador() {
+    document.querySelectorAll('input[name="tipo"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const divUnidades = document.getElementById('divUnidades');
+            if (this.value === 'Unidade Temática' || this.value === 'Plano de Curso Anual') {
+                divUnidades.classList.remove('hidden');
+            } else {
+                divUnidades.classList.add('hidden');
+            }
+        });
+    });
+}
+
+function planejador_iniciarGeracao() {
+    if (checkApiKey()) {
+        gerarPlanoComGemini();
+    }
+}
+
+async function gerarPlanoComGemini() {
+    const escola = document.getElementById('escola').value;
+    const professor = document.getElementById('professor').value;
+    const turma = document.getElementById('turma').value;
+    const ano = document.getElementById('ano').value;
+    const disciplina = document.querySelector('input[name="disciplina"]:checked')?.value;
+    const serie = document.querySelector('input[name="serie"]:checked')?.value;
+    const tipo = document.querySelector('input[name="tipo"]:checked')?.value;
+    const duracao = document.querySelector('input[name="duracao"]:checked')?.value;
+    const tema = document.getElementById('tema').value;
+    const nivel = document.querySelector('input[name="nivel"]:checked')?.value;
+    const recursos = Array.from(document.querySelectorAll('.btn-check input[type="checkbox"]:checked')).map(el => el.value).join(', ');
+    const necessidades = document.getElementById('necessidades').value || 'nenhuma informada';
+    const objetivos = document.getElementById('objetivos-planejador').value || 'não especificado';
+
+    if (!tema || !disciplina || !professor || !turma) {
+        showToast('Preencha: Tema, Disciplina, Professor e Turma.', 'warning');
+        return;
+    }
+
+    const prompt = `Atue como um professor construtivista experiente. Crie um ${tipo.toLowerCase()} detalhado para ${disciplina}, ${serie}, com duração de ${duracao} minutos. Tema: "${tema}". Contexto: Escola: ${escola}, Professor: ${professor}, Turma: ${turma}, Ano: ${ano}, Nível da turma: ${nivel}, Necessidades específicas: ${necessidades}, Recursos disponíveis: ${recursos}. Objetivos pedagógicos: Aprendizagem significativa, estímulo à autonomia e pensamento crítico, avaliação formativa, inclusão e diversidade. Sua tarefa: 1. Identifique as habilidades da BNCC mais adequadas. 2. Estruture o plano com: Objetivo de Aprendizagem, Metodologia (etapas), Recursos, Atividade principal, Avaliação formativa, Orientações ao professor. Use linguagem clara, prática e inspiradora. Formate a resposta usando Markdown.`;
+    
+    document.getElementById('planejador-loading').classList.remove('hidden');
+    document.getElementById('planejador-resultado').classList.add('hidden');
+
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+            })
+        });
+        const data = await response.json();
+        if (data.candidates && data.candidates[0].content) {
+            const texto = data.candidates[0].content.parts[0].text;
+            planejador_exibirPlano(texto, { tipo, tema });
+        } else {
+            throw new Error(data.error?.message || 'Erro na resposta do Gemini.');
+        }
+    } catch (err) {
+        showToast(`Erro: ${err.message}`, 'danger');
+    } finally {
+        document.getElementById('planejador-loading').classList.add('hidden');
+    }
+}
+
+function planejador_exibirPlano(texto, dados) {
+    document.getElementById('tituloPlano').textContent = `${dados.tipo} - ${dados.tema}`;
+    document.getElementById('planoIA').innerHTML = marked.parse(texto);
+    document.getElementById('planejador-resultado').classList.remove('hidden');
+}
+
+function planejador_limparTudo() {
+    document.getElementById('formPrompt').reset();
+    document.querySelectorAll('#formPrompt input[type="radio"], #formPrompt input[type="checkbox"]').forEach(el => el.checked = false);
+    document.getElementById('planejador-resultado').classList.add('hidden');
+    showToast('Campos do planejador limpos.', 'info');
+}
+
+function planejador_salvarPDF() { window.print(); }
+
+function planejador_copiarPlano() {
+    const plano = document.getElementById('plano-impressao').innerText;
+    navigator.clipboard.writeText(plano).then(() => {
+        showToast('Plano copiado!', 'success');
+    }).catch(err => {
+        showToast('Falha ao copiar.', 'danger');
+    });
+}
+
+// ===================================================================================
+// LÓGICA DO APLICATIVO 2: GERADOR DE PROVAS
+// ===================================================================================
+let gerador_avaliacoes = [];
+
+function initGerador() {
+    gerador_avaliacoes = JSON.parse(localStorage.getItem('avaliacoes') || '[]');
+}
+
+async function gerador_gerarProva() {
+    if (!checkApiKey()) return;
+
+    const dados = {
+        disciplina: document.getElementById('disciplina-gerador').value,
+        serie: document.getElementById('serie-gerador').value,
+        tema: document.getElementById('tema-gerador').value,
+        textoBase: document.getElementById('textoBase').value.trim(),
+        numQuestoes: document.getElementById('numQuestoes').value,
+        dificuldade: document.getElementById('dificuldade').value,
+        tiposQuestao: Array.from(document.querySelectorAll('input[name="tipoQuestao"]:checked')).map(cb => cb.value),
+        objetivos: document.getElementById('objetivos-gerador').value
+    };
+
+    if (!dados.tema.trim()) {
+        showToast('Informe o tema da prova.', 'warning');
+        return;
+    }
+
+    document.getElementById('loadingModal').classList.remove('hidden');
+
+    try {
+        const prova = await gerador_chamarGemini(dados);
+        gerador_exibirProva(prova);
+        gerador_salvarAvaliacao(prova);
+        showToast('Prova gerada com sucesso!', 'success');
+    } catch (error) {
+        showToast(`Erro ao gerar prova: ${error.message}`, 'danger');
+    } finally {
+        document.getElementById('loadingModal').classList.add('hidden');
+    }
+}
+
+async function gerador_chamarGemini(dados) {
+    const prompt = `Como um especialista em educação brasileira e na BNCC, crie uma prova de ${dados.disciplina} para alunos do ${dados.serie}. Tema: "${dados.tema}". ${dados.textoBase ? `Texto Base Obrigatório: """${dados.textoBase}""" Todas as questões DEVERÃO ser baseadas no texto.` : ''} Especificações: ${dados.numQuestoes} questões, nível ${dados.dificuldade}, tipos: ${dados.tiposQuestao.join(', ')}. ${dados.objetivos ? `Objetivos: ${dados.objetivos}` : ''} Formato de Saída (JSON Obrigatório): Responda APENAS com um objeto JSON válido, sem texto adicional, com a estrutura: { "titulo": "Avaliação de ${dados.disciplina}: ${dados.tema}", "questoes": [ { "numero": 1, "tipo": "multipla_escolha", "enunciado": "...", "alternativas": ["A) ...", "B) ..."], "resposta": "A" } ] }`;
+    
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${userApiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { responseMimeType: "application/json" }
+        })
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Erro na API: ${errorData.error.message}`);
+    }
+
+    const result = await response.json();
+    const iaResponseText = result.candidates[0].content.parts[0].text;
+    return gerador_processarRespostaIA(iaResponseText, dados);
+}
+
+function gerador_processarRespostaIA(resposta, dados) {
+    try {
+        const dadosIA = JSON.parse(resposta);
+        return {
+            id: Date.now(),
+            titulo: dadosIA.titulo || `Prova de ${dados.disciplina} - ${dados.tema}`,
+            disciplina: dados.disciplina,
+            serie: dados.serie,
+            tema: dados.tema,
+            dataGeracao: new Date().toISOString(),
+            questoes: dadosIA.questoes || []
+        };
+    } catch (error) {
+        throw new Error("A IA retornou uma resposta em formato inválido.");
+    }
+}
+
+function gerador_exibirProva(prova) {
+    const preview = document.getElementById('provaPreview');
+    let html = `<div class="text-left"><h4 class="font-bold text-lg text-white">${prova.titulo}</h4><p class="text-sm text-gray-400">${prova.serie} • ${prova.questoes?.length || 0} questões</p></div>`;
+    preview.innerHTML = html;
+}
+
+function gerador_salvarAvaliacao(avaliacao) {
+    gerador_avaliacoes.unshift(avaliacao);
+    if (gerador_avaliacoes.length > 50) gerador_avaliacoes.pop();
+    localStorage.setItem('avaliacoes', JSON.stringify(gerador_avaliacoes));
+}
+
+
+// ===================================================================================
+// LÓGICA DO APLICATIVO 3: CORRETOR DE PROVAS
+// ===================================================================================
+let corretor_uploadedFile = null;
+
+function initCorretor() {
+    const provaUploadInput = document.getElementById('prova-upload');
+    const imagePreview = document.getElementById('image-preview');
+    const filePreviewContainer = document.getElementById('file-preview-container');
+
+    provaUploadInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) {
+            corretor_uploadedFile = null;
+            filePreviewContainer.classList.add('hidden');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            corretor_uploadedFile = {
+                mimeType: file.type,
+                data: reader.result.split(',')[1]
+            };
+            if (file.type.startsWith('image/')) {
+                imagePreview.src = reader.result;
+                imagePreview.classList.remove('hidden');
+                filePreviewContainer.classList.remove('hidden');
+            } else {
+                showToast('Tipo de arquivo não suportado. Por favor, envie uma imagem.', 'warning');
+                corretor_uploadedFile = null;
+                filePreviewContainer.classList.add('hidden');
+            }
+        };
+        reader.readAsDataURL(file);
+    });
+
+    document.getElementById('corrigir-btn').addEventListener('click', async () => {
+        if (!checkApiKey()) return;
+
+        const gabarito = document.getElementById('gabarito').value.trim();
+        if (!gabarito) {
+            showToast('Insira o gabarito da prova.', 'warning');
+            return;
+        }
+        if (!corretor_uploadedFile) {
+            showToast('Faça o upload da imagem da prova.', 'warning');
+            return;
+        }
+
+        const loader = document.getElementById('corretor-loader');
+        const placeholder = document.getElementById('corretor-placeholder');
+        const output = document.getElementById('corretor-resultado-output');
+        const btn = document.getElementById('corrigir-btn');
+
+        loader.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        output.innerHTML = '';
+        btn.disabled = true;
+        btn.textContent = 'Corrigindo...';
+        
+        const prompt = `Você é um assistente de professor para correção de provas. Analise a imagem da prova do aluno e compare com o gabarito oficial. Gabarito: """${gabarito}""". Instruções: 1. Corrija cada questão. 2. Indique "Certa" ou "Errada". 3. Se errada, explique o erro. 4. Apresente um resumo de acertos/erros. 5. Calcule uma nota de 0 a 10. 6. Use formatação Markdown.`;
+
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [
+                            { text: prompt },
+                            { inline_data: { mime_type: corretor_uploadedFile.mimeType, data: corretor_uploadedFile.data } }
+                        ]
+                    }]
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Erro da API: ${errorData.error.message}`);
+            }
+
+            const data = await response.json();
+            const aiResponse = data.candidates[0].content.parts[0].text;
+            output.innerHTML = marked.parse(aiResponse);
+
+        } catch (error) {
+            showToast(`Falha na correção: ${error.message}`, 'danger');
+            output.innerHTML = `<p class="text-red-500"><b>Falha:</b> ${error.message}</p>`;
+        } finally {
+            loader.classList.add('hidden');
+            btn.disabled = false;
+            btn.textContent = 'Corrigir Prova';
+        }
+    });
+}
+
+
+// Estilos para os radio buttons e checkboxes do planejador (para dark mode)
+const style = document.createElement('style');
+style.textContent = `
+    .btn-radio {
+      @apply bg-slate-700 border border-slate-600 rounded-lg p-3 text-center text-sm shadow-sm hover:shadow-lg cursor-pointer transition;
+    }
+    .btn-radio input[type="radio"]:checked + .btn-label {
+      @apply border-indigo-500 bg-indigo-900/50 font-semibold text-indigo-300;
+    }
+    .btn-label {
+      @apply block w-full h-full border-2 border-transparent rounded-md p-2 transition text-gray-300;
+    }
+    .btn-check {
+      @apply bg-slate-700 border border-slate-600 rounded p-2 text-sm shadow-sm hover:shadow-lg cursor-pointer transition;
+    }
+    .btn-check input[type="checkbox"]:checked + .check-label {
+      @apply bg-indigo-900/50 border-indigo-500 text-indigo-300 font-medium;
+    }
+    .check-label {
+      @apply block w-full border-2 border-transparent rounded p-2 transition text-gray-300;
+    }
+`;
+document.head.appendChild(style);
+
+
+</script>
+</body>
+</html>
