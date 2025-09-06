@@ -1,4 +1,4 @@
-S.O.S. Professor: Sua Suite Pedagógica com IA
+Plano B: Sua Suite Pedagógica com IA
 Para o mestre que, entre diários, turmas e a busca incessante pelo saber, precisa de um aliado para otimizar o tempo e potencializar o ensino.
 
 🎯 O que é o S.O.S. Professor?
