@@ -25,7 +25,7 @@
             display: block;
         }
         
-        /* CORREÇÃO 1: Estilos de impressão aprimorados para o planejador */
+        /* Estilos de impressão aprimorados para o planejador */
         @media print {
             body * {
                 visibility: hidden;
@@ -63,8 +63,7 @@
                         <i class="fas fa-brain text-white"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold text-white">[Plano "B"]</h1>
-                        <p class="text-sm text-indigo-400">Escola Januário Eleodoro de Lima</p>
+                        <h1 class="text-xl font-bold text-white">S.O.S. Professor</h1>
                         <p class="text-sm text-indigo-400">Desenvolvida com IA pelo Profº Sérgio Araújo</p>
                     </div>
                 </div>
@@ -153,6 +152,14 @@
                         <label class="btn-radio"><input type="radio" name="tipo" value="Sequência Didática"> <span class="btn-label">Sequência Didática</span></label>
                     </div>
                 </div>
+                
+                <!-- MODIFICAÇÃO: Campo para número de aulas -->
+                <div id="divNumAulas" class="hidden">
+                     <hr class="border-slate-700 my-4">
+                    <label for="numAulas" class="block text-sm font-medium text-gray-300 mb-2">Número de Aulas Previstas</label>
+                    <input type="number" id="numAulas" value="4" min="1" class="w-full bg-slate-700 border border-slate-600 rounded p-2 text-white" placeholder="Ex: 8">
+                </div>
+
                 <hr class="border-slate-700">
                 <div id="divUnidades" class="hidden">
                   <label class="block text-sm font-medium text-gray-300 mb-2">Número de Unidades Letivas</label>
@@ -163,7 +170,7 @@
                   </div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-300 mb-2">Duração (min)</label>
+                  <label class="block text-sm font-medium text-gray-300 mb-2">Duração (min por aula)</label>
                   <div class="grid grid-cols-2 gap-2">
                     <label class="btn-radio"><input type="radio" name="duracao" value="45" required> <span class="btn-label">45 min</span></label>
                     <label class="btn-radio"><input type="radio" name="duracao" value="90"> <span class="btn-label">90 min</span></label>
@@ -220,9 +227,9 @@
             <div id="planejador-resultado" class="hidden mt-8">
                  <div class="bg-slate-800 p-8 rounded-lg shadow-md border border-slate-700 no-print">
                      <div id="plano-impressao" class="bg-slate-800">
-                        <h1 id="tituloPlano" class="text-2xl font-bold text-white border-b-2 border-indigo-500 pb-2 mb-4">Plano de Aula</h1>
-                        <div id="planoIA" class="prose prose-invert max-w-none"></div>
-                    </div>
+                         <h1 id="tituloPlano" class="text-2xl font-bold text-white border-b-2 border-indigo-500 pb-2 mb-4">Plano de Aula</h1>
+                         <div id="planoIA" class="prose prose-invert max-w-none"></div>
+                     </div>
                  </div>
 
                 <div class="mt-6 flex flex-wrap gap-3 justify-center no-print">
@@ -242,7 +249,7 @@
                 <div class="lg:col-span-2 bg-slate-800 rounded-xl shadow-lg border border-slate-700 p-6">
                      <h2 class="text-2xl font-bold text-white mb-6"><i class="fas fa-file-alt text-indigo-400 mr-3"></i>Criar Prova com IA</h2>
                      <form id="provaForm" class="space-y-6">
-                        <!-- Todos os campos do gerador de provas -->
+                         <!-- Todos os campos do gerador de provas -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label for="disciplina-gerador" class="block text-sm font-medium text-gray-300 mb-2">Disciplina</label>
@@ -326,7 +333,6 @@
                     </div>
                     <div>
                         <label for="prova-upload" class="block text-sm font-medium text-gray-300 mb-1">Prova do Aluno (Imagem ou PDF):</label>
-                        <!-- CORREÇÃO 3: Adicionado suporte a PDF -->
                         <input id="prova-upload" type="file" accept="image/*,application/pdf" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700">
                         <div id="file-preview-container" class="mt-4 border-2 border-dashed border-slate-600 rounded-lg p-4 text-center hidden">
                             <img id="image-preview" src="#" alt="Pré-visualização" class="max-h-48 mx-auto hidden rounded"/>
@@ -360,7 +366,7 @@
             <label for="api-key-input" class="block text-sm font-medium text-gray-300">Sua Chave:</label>
             <input type="password" id="api-key-input" class="mt-1 block w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md shadow-sm placeholder-gray-400 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
              <p class="text-xs text-slate-400 mt-1">
-                <a href="https://makersuite.google.com/app/apikey" target="_blank" class="text-indigo-400 hover:underline">Não tem uma chave? Obtenha uma gratuitamente aqui.</a>
+                 <a href="https://makersuite.google.com/app/apikey" target="_blank" class="text-indigo-400 hover:underline">Não tem uma chave? Obtenha uma gratuitamente aqui.</a>
             </p>
             <div class="mt-6 flex justify-end space-x-4">
                 <button onclick="closeApiModal()" class="px-4 py-2 bg-slate-600 text-white rounded-md hover:bg-slate-500">Fechar</button>
@@ -456,7 +462,15 @@ function showToast(message, type = 'info') {
 function initPlanejador() {
     document.querySelectorAll('input[name="tipo"]').forEach(radio => {
         radio.addEventListener('change', function() {
-            document.getElementById('divUnidades').classList.toggle('hidden', this.value !== 'Unidade Temática' && this.value !== 'Plano de Curso Anual');
+            // Lógica para "Unidades Letivas"
+            const divUnidades = document.getElementById('divUnidades');
+            const tiposComUnidades = ['Unidade Temática', 'Plano de Curso Anual'];
+            divUnidades.classList.toggle('hidden', !tiposComUnidades.includes(this.value));
+            
+            // MODIFICAÇÃO: Lógica para "Número de Aulas"
+            const divNumAulas = document.getElementById('divNumAulas');
+            const tiposComDuracaoEmAulas = ['Unidade Temática', 'Plano de Curso Anual', 'Projeto Interdisciplinar', 'Sequência Didática'];
+            divNumAulas.classList.toggle('hidden', !tiposComDuracaoEmAulas.includes(this.value));
         });
     });
 }
@@ -479,15 +493,23 @@ async function gerarPlanoComGemini() {
         nivel: document.querySelector('input[name="nivel"]:checked')?.value,
         recursos: Array.from(document.querySelectorAll('.btn-check input[type="checkbox"]:checked')).map(el => el.value).join(', '),
         necessidades: document.getElementById('necessidades').value || 'nenhuma informada',
-        objetivos: document.getElementById('objetivos-planejador').value || 'não especificado'
+        objetivos: document.getElementById('objetivos-planejador').value || 'não especificado',
+        numAulas: document.getElementById('numAulas').value
     };
 
     if (!dados.tema || !dados.disciplina || !dados.professor || !dados.turma) {
         showToast('Preencha: Tema, Disciplina, Professor e Turma.', 'warning');
         return;
     }
+    
+    // MODIFICAÇÃO: Constrói a instrução de duração dinamicamente
+    const tiposComDuracaoEmAulas = ['Unidade Temática', 'Plano de Curso Anual', 'Projeto Interdisciplinar', 'Sequência Didática'];
+    let instrucaoDuracao = `com duração de ${dados.duracao} minutos.`; // Duração para aula única
+    if (tiposComDuracaoEmAulas.includes(dados.tipo) && dados.numAulas > 0) {
+        instrucaoDuracao = `projetado para se estender por um total de ${dados.numAulas} aulas, cada uma com aproximadamente ${dados.duracao} minutos.`;
+    }
 
-    const prompt = `Atue como um professor construtivista experiente. Crie um ${dados.tipo.toLowerCase()} detalhado para ${dados.disciplina}, ${dados.serie}, com duração de ${dados.duracao} minutos. Tema: "${dados.tema}". Contexto: Escola: ${dados.escola}, Professor: ${dados.professor}, Turma: ${dados.turma}, Ano: ${dados.ano}, Nível da turma: ${dados.nivel}, Necessidades específicas: ${dados.necessidades}, Recursos disponíveis: ${dados.recursos}. Objetivos pedagógicos: Aprendizagem significativa, estímulo à autonomia e pensamento crítico, avaliação formativa, inclusão e diversidade. Sua tarefa: 1. Identifique as habilidades da BNCC mais adequadas. 2. Estruture o plano com: Objetivo de Aprendizagem, Metodologia (etapas), Recursos, Atividade principal, Avaliação formativa, Orientações ao professor. Use linguagem clara, prática e inspiradora. Formate a resposta usando Markdown.`;
+    const prompt = `Atue como um professor construtivista experiente. Crie um ${dados.tipo.toLowerCase()} detalhado para ${dados.disciplina}, ${dados.serie}, ${instrucaoDuracao} Tema: "${dados.tema}". Contexto: Escola: ${dados.escola}, Professor: ${dados.professor}, Turma: ${dados.turma}, Ano: ${dados.ano}, Nível da turma: ${dados.nivel}, Necessidades específicas: ${dados.necessidades}, Recursos disponíveis: ${dados.recursos}. Objetivos pedagógicos: Aprendizagem significativa, estímulo à autonomia e pensamento crítico, avaliação formativa, inclusão e diversidade. Sua tarefa: 1. Identifique as habilidades da BNCC mais adequadas. 2. Estruture o plano com: Objetivo de Aprendizagem, Metodologia (etapas), Recursos, Atividade principal, Avaliação formativa, Orientações ao professor. Se o plano for para múltiplas aulas, detalhe o que será feito em cada uma delas. Use linguagem clara, prática e inspiradora. Formate a resposta usando Markdown.`;
     
     document.getElementById('planejador-loading').classList.remove('hidden');
     document.getElementById('planejador-resultado').classList.add('hidden');
@@ -496,7 +518,7 @@ async function gerarPlanoComGemini() {
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.7, maxOutputTokens: 2048 } })
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.7, maxOutputTokens: 4096 } })
         });
         const data = await response.json();
         if (!response.ok || (data.candidates && data.candidates[0].finishReason !== 'STOP')) throw new Error(data.error?.message || 'A resposta da IA foi incompleta ou continha conteúdo bloqueado.');
@@ -519,6 +541,9 @@ function planejador_limparTudo() {
     document.getElementById('formPrompt').reset();
     document.querySelectorAll('#formPrompt input[type="radio"], #formPrompt input[type="checkbox"]').forEach(el => el.checked = false);
     document.getElementById('planejador-resultado').classList.add('hidden');
+    // Esconde os campos condicionais também
+    document.getElementById('divUnidades').classList.add('hidden');
+    document.getElementById('divNumAulas').classList.add('hidden');
     showToast('Campos do planejador limpos.', 'info');
 }
 
@@ -602,7 +627,6 @@ function gerador_processarRespostaIA(resposta, dados) {
         throw new Error("A IA retornou uma resposta em formato JSON inválido.");
     }
 }
-// CORREÇÃO 2: Função de exibir prova melhorada
 function gerador_exibirProva(prova) {
     const preview = document.getElementById('provaPreview');
     let html = `<div class="text-left space-y-4">
@@ -702,7 +726,6 @@ function initCorretor() {
         reader.onloadend = () => {
             corretor_uploadedFile = { mimeType: file.type, data: reader.result.split(',')[1] };
             
-            // CORREÇÃO 3: Lógica para exibir preview de imagem ou PDF
             imagePreview.classList.add('hidden');
             pdfPreview.classList.add('hidden');
 
